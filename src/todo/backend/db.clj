@@ -41,3 +41,27 @@
     (:description todo-data)
     0
     (str (java.time.Instant/now))]))
+
+
+;; Alterna o status de conclusao de uma tarefa
+(defn toggle-todo!
+  "Alterna o status 'completed' de um todo no banco."
+  [id]
+  (jdbc/execute-one! db-spec ["
+    UPDATE todos
+    SET completed = (1 - completed)
+    WHERE id = ?
+    RETURNING *"
+    id]))
+
+;; Remove uma tarefa do banco de dados
+(defn delete-todo!
+  "Remove um todo do banco. Retorna o todo removido, ou nil se nao existir."
+  [id]
+  (jdbc/execute-one! db-spec ["
+    DELETE FROM todos
+    WHERE id = ?
+    RETURNING *"
+    id]))
+
+

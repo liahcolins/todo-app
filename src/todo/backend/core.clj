@@ -14,15 +14,26 @@
   (:gen-class))
 
 ;; Configuracao das rotas da API
+
+
 (def app-routes
   (ring/router
    [["/api"
+
      ["/hello"
       {:get {:handler handler/hello-handler}}]
 
      ["/todos"
       {:get {:handler handler/list-todos-handler}
-       :post {:handler handler/create-todo-handler}}]]]))
+       :post {:handler handler/create-todo-handler}}]
+
+     ["/todos/:id/toggle"
+      {:post {:handler handler/toggle-todo-handler}}]
+
+     ;; Nova rota para excluir uma tarefa
+     ["/todos/:id"
+      {:delete {:handler handler/delete-todo-handler}}]]]))
+
 
 ;; Configuracao dos middlewares
 (def app

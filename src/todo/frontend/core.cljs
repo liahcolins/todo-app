@@ -12,7 +12,6 @@
            :loading false
            :error nil}))
 
-;; Endereco da API
 (def api-url "http://localhost:3000/api")
 
 ;; Faz requisicoes HTTP e converte JSON
@@ -66,6 +65,47 @@
                :error (.-message e)
                :loading false)))))
 
+
+;; Alterna o status de uma tarefa pela API
+(defn toggle-todo
+  "Chama a API para alternar o status de um todo."
+  [id]
+  (go
+    (try
+      (<p! (fetch-json
+            (str api-url "/todos/" id "/toggle")
+            {:method "POST"}))
+
+      ;; Atualiza a lista apos a alteracao
+      (get-todos)
+
+      (catch js/Error e
+        (swap! app-state
+               assoc
+               :error (.-message e)
+               :loading false)))))
+
+
+;; Exclui uma tarefa pela API
+(defn delete-todo
+  "Chama a API para remover um todo."
+  [id]
+  (go
+    (try
+      (<p! (fetch-json
+            (str api-url "/todos/" id)
+            {:method "DELETE"}))
+
+      ;; Atualiza a lista apos a exclusao
+      (get-todos)
+
+      (catch js/Error e
+        (swap! app-state
+               assoc
+               :error (.-message e)
+               :loading false)))))
+
+
 ;; Formulario de cadastro
 (defn todo-form []
   [:div.todo-input
@@ -88,20 +128,35 @@
            (swap! app-state assoc :input-text ""))))}
     "Adicionar"]])
 
-;; Lista de tarefas
+
+;; Lista de tarefas 
 (defn todo-list []
   [:ul.todo-list
    (for [todo (:todos @app-state)]
      ^{:key (:todos/id todo)}
+
      [:li.todo-item
-      (:todos/title todo)])])
+      {:class (when (= 1 (:todos/completed todo))
+                "completed")}
+
+      [:input.todo-checkbox
+       {:type "checkbox"
+        :checked (not= 0 (:todos/completed todo))
+        :on-change #(toggle-todo (:todos/id todo))}]
+
+      [:span.todo-title
+       (:todos/title todo)]
+
+      [:button.delete-btn
+       {:on-click #(delete-todo (:todos/id todo))}
+       "X"]])])
 
 
 ;; Componente principal
 (defn app []
   [:div.todo-app
    [:h1 "Todo App"]
-   [:p "Conectado à API. Os dados sobrevivem ao F5!"]
+   [:p "Pequenas tarefas, grandes conquistas."]
 
    [todo-form]
 
@@ -121,5 +176,4 @@
               (js/document.getElementById "app"))]
     (.render root (r/as-element [app])))
 
-  ;; Busca as tarefas ao iniciar
   (get-todos))
