@@ -1,22 +1,43 @@
+(ns todo.backend.db
+  "Este namespace gerencia os dados dos 'todos'
+   usando um banco de dados persistente SQLite."
+  (:require [next.jdbc :as jdbc]))
 
-(ns todo.backend.db)
+;; Configuracao do banco de dados
+(def db-spec
+  {:dbtype "sqlite"
+   :dbname "prod.db"})
 
-;; Armazena as tarefas em memória.
-(def todos-db (atom {}))
+;; Inicializa o banco de dados
+(defn initialize-database!
+  "Cria a tabela 'todos' se ela nao existir."
+  []
+  (jdbc/execute! db-spec ["
+    CREATE TABLE IF NOT EXISTS todos (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT,
+      description TEXT,
+      completed BOOLEAN DEFAULT 0,
+      created_at TEXT
+    )
+  "]))
 
-;; Controla os IDs das tarefas.
-(def next-id (atom 0))
+;; Retorna todas as tarefas cadastradas
+(defn get-all-todos
+  "Retorna todas as tarefas do banco."
+  []
+  (jdbc/execute! db-spec
+                 ["SELECT * FROM todos ORDER BY created_at DESC"]))
 
-;; Retorna todas as tarefas cadastradas.
-(defn get-all-todos []
-  (vec (vals @todos-db)))
-
-;; Cria uma nova tarefa e a adiciona ao banco.
-(defn create-todo [todo-data]
-  (let [id (swap! next-id inc)
-        new-todo (merge todo-data
-                        {:id id
-                         :completed false
-                         :created-at (str (java.time.Instant/now))})]
-    (swap! todos-db assoc id new-todo)
-    new-todo))
+;; Cadastra uma nova tarefa
+(defn create-todo
+  "Cria uma tarefa, salva no banco e retorna seus dados."
+  [todo-data]
+  (jdbc/execute-one! db-spec ["
+    INSERT INTO todos (title, description, completed, created_at)
+    VALUES (?, ?, ?, ?)
+    RETURNING *"
+    (:title todo-data)
+    (:description todo-data)
+    0
+    (str (java.time.Instant/now))]))

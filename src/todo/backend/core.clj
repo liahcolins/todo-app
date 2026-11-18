@@ -1,4 +1,3 @@
-
 (ns todo.backend.core
   (:require [ring.adapter.jetty :as jetty]
             [reitit.ring :as ring]
@@ -10,7 +9,8 @@
              :refer [wrap-keyword-params]]
             [ring.middleware.cors
              :refer [wrap-cors]]
-            [todo.backend.handler :as handler])
+            [todo.backend.handler :as handler]
+            [todo.backend.db :as db])
   (:gen-class))
 
 ;; Configuracao das rotas da API
@@ -50,4 +50,6 @@
 (defn -main [& args]
   (let [port (Integer/parseInt
               (or (first args) "3000"))]
+    (db/initialize-database!)
     (start-server port)))
+

@@ -92,9 +92,10 @@
 (defn todo-list []
   [:ul.todo-list
    (for [todo (:todos @app-state)]
-     ^{:key (:id todo)}
+     ^{:key (:todos/id todo)}
      [:li.todo-item
-      (:title todo)])])
+      (:todos/title todo)])])
+
 
 ;; Componente principal
 (defn app []
