@@ -1,0 +1,29 @@
+
+# --- Geral ---
+.DS_Store
+Thumbs.db
+*.log
+
+# --- Dependências ---
+/node_modules/
+
+# --- Clojure & Java ---
+/target/
+.cpcache/
+.clj-kondo/
+.cider-repl-history
+
+# --- shadow-cljs ---
+/resources/public/js/
+.shadow-cljs/
+
+# --- IDEs ---
+.vscode/
+*~
+\#*\#
+.calva/
+
+# --- Banco de Dados ---
+*.db
+*.sqlite
+*.sqlite3
