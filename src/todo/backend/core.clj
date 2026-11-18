@@ -1,3 +1,4 @@
+
 (ns todo.backend.core
   (:require [ring.adapter.jetty :as jetty]
             [reitit.ring :as ring]
@@ -7,10 +8,12 @@
              :refer [wrap-params]]
             [ring.middleware.keyword-params
              :refer [wrap-keyword-params]]
+            [ring.middleware.cors
+             :refer [wrap-cors]]
             [todo.backend.handler :as handler])
   (:gen-class))
 
-;; Configuracao das rotas da API.
+;; Configuracao das rotas da API
 (def app-routes
   (ring/router
    [["/api"
@@ -21,18 +24,23 @@
       {:get {:handler handler/list-todos-handler}
        :post {:handler handler/create-todo-handler}}]]]))
 
-;; Configuracao dos middlewares.
+;; Configuracao dos middlewares
 (def app
   (ring/ring-handler
    app-routes
    (ring/create-default-handler)
    {:middleware
-    [wrap-json-response
+    [[wrap-cors
+      :access-control-allow-origin [#"http://localhost:8000"]
+      :access-control-allow-methods [:get :post :put :delete]
+      :access-control-allow-headers ["Content-Type"]]
+
+     wrap-json-response
      [wrap-json-body {:keywords? true}]
      wrap-params
      wrap-keyword-params]}))
 
-;; Inicializacao do servidor Jetty.
+;; Inicializacao do servidor
 (defn start-server [port]
   (println (str "Servidor iniciado na porta " port))
   (jetty/run-jetty #'app
