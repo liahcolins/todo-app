@@ -1,16 +1,65 @@
 (ns todo.frontend.core
   (:require [reagent.core :as r]
-            [reagent.dom.client :as rdom]))
+            [reagent.dom.client :as rdom]
+            [clojure.string :as str]))
 
-;; Primeiro componente visual
-(defn hello-world []
-  [:div
-   [:h1 "Olá, Alunos!"]
-   [:p "Nossa aplicação ClojureScript está funcionando."]])
+;; Estado reativo da aplicação
+(defonce app-state
+  (r/atom {:next-id 1
+           :input-text ""
+           :todos []}))
 
-;; Inicializa a interface no navegador
+;; Lógica de cadastro local
+(defn adicionar-todo-local []
+  (swap! app-state
+         (fn [estado-atual]
+           (let [novo-titulo (:input-text estado-atual)
+                 novo-id (:next-id estado-atual)]
+             (if (str/blank? novo-titulo)
+               estado-atual
+               {:next-id (inc novo-id)
+                :input-text ""
+                :todos (conj (:todos estado-atual)
+                             {:id novo-id
+                              :title novo-titulo})})))))
+
+;; Formulário de tarefas
+(defn todo-form []
+  [:div.todo-input
+   [:input
+    {:type "text"
+     :placeholder "O que precisa ser feito?"
+     :value (:input-text @app-state)
+     :on-change #(swap! app-state
+                        assoc
+                        :input-text
+                        (-> % .-target .-value))}]
+
+   [:button
+    {:on-click adicionar-todo-local}
+    "Adicionar (Local)"]])
+
+;; Lista de tarefas
+(defn todo-list []
+  [:ul.todo-list
+   (for [todo (:todos @app-state)]
+     ^{:key (:id todo)}
+     [:li.todo-item
+      (:title todo)])])
+
+;; Componente principal
+(defn app []
+  [:div.todo-app
+   [:h1 "Todo App (Somente Frontend)"]
+
+   [:p "Isto é 100% local. Recarregue (F5) para ver os dados sumirem."]
+
+   [todo-form]
+   [todo-list]])
+
+;; Inicialização do frontend
 (defn ^:export init []
-  (println "Frontend inicializado...")
+  (println "Frontend Todo List inicializado...")
   (let [root (rdom/create-root
               (js/document.getElementById "app"))]
-    (.render root (r/as-element [hello-world]))))
+    (.render root (r/as-element [app]))))
