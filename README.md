@@ -195,6 +195,14 @@ O projeto foi desenvolvido em fases:
 
 Cada etapa foi registrada em commits no GitHub.
 
+
+## Vídeo Demonstrativo
+
+O vídeo apresenta o desenvolvimento e o funcionamento da aplicação Todo List.
+
+🎥 **[Assistir à apresentação e demonstração do Todo List](https://drive.google.com/drive/folders/1fHGt6R4eg51u7HPjaxG0flOO9Eox_t3_?usp=sharing)**
+
+
 ## Referência
 
 Projeto desenvolvido a partir do tutorial:
